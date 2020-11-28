@@ -1,6 +1,6 @@
 FROM maven:3.5.4-jdk-8 AS stage-atlas
 
-ENV ATLAS_VERSION 2.0.0
+ENV ATLAS_VERSION 2.1.0
 ENV TARBALL apache-atlas-${ATLAS_VERSION}-sources.tar.gz
 ENV	ATLAS_REPO      https://dist.apache.org/repos/dist/release/atlas/${ATLAS_VERSION}/${TARBALL}
 ENV	MAVEN_OPTS	"-Xms2g -Xmx2g"
@@ -25,7 +25,7 @@ COPY --from=stage-atlas /apache-atlas-sqoop-hook.tar.gz /apache-atlas-sqoop-hook
 RUN yum update -y  \
 	&& yum install -y python python36 && yum install java-1.8.0-openjdk java-1.8.0-openjdk-devel python net-tools -y \
 	&& yum install which -y \
-	&& yum clean all 
+	&& yum clean all
 RUN groupadd hadoop && \
 	useradd -m -d /opt/atlas -g hadoop atlas
 
