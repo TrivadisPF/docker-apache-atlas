@@ -48,7 +48,7 @@ COPY --from=stage-atlas /apache-atlas-sqoop-hook.tar.gz /apache-atlas-sqoop-hook
 
 # install which - GUS 10.5
 RUN yum update -y  \
-	&& yum install -y python python37 && yum install java-1.8.0-openjdk java-1.8.0-openjdk-devel patch net-tools -y \
+	&& yum install -y python3 && yum install java-1.8.0-openjdk java-1.8.0-openjdk-devel patch net-tools -y \
 	&& yum install which -y \
 	&& yum clean all
 RUN groupadd hadoop && \
