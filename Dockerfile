@@ -34,10 +34,10 @@ RUN apt-get update \
         -Drat.skip=true \
         package -Pdist
 
-RUN mv /tmp/atlas-src/target/apache-atlas-*-bin.tar.gz /apache-atlas.tar.gz \
-	&& mv /tmp/atlas-src/target/apache-atlas-*-kafka-hook.tar.gz /apache-atlas-kafka-hook.tar.gz \
-	&& mv /tmp/atlas-src/target/apache-atlas-*-hive-hook.tar.gz /apache-atlas-hive-hook.tar.gz \
-	&& mv /tmp/atlas-src/target/apache-atlas-*-sqoop-hook.tar.gz /apache-atlas-sqoop-hook.tar.gz
+RUN mv distro/target/apache-atlas-*-bin.tar.gz /apache-atlas.tar.gz \
+	&& mv distro/target/apache-atlas-*-kafka-hook.tar.gz /apache-atlas-kafka-hook.tar.gz \
+	&& mv distro/target/apache-atlas-*-hive-hook.tar.gz /apache-atlas-hive-hook.tar.gz \
+	&& mv distro/target/apache-atlas-*-sqoop-hook.tar.gz /apache-atlas-sqoop-hook.tar.gz
 
 FROM centos:7
 
