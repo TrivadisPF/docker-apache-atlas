@@ -1,18 +1,43 @@
-FROM maven:3.5.4-jdk-8 AS stage-atlas
+FROM ubuntu:20.04 AS stage-atlas
 
 ENV ATLAS_VERSION 2.3.0
 ENV TARBALL apache-atlas-${ATLAS_VERSION}-sources.tar.gz
-ENV	ATLAS_REPO      https://dist.apache.org/repos/dist/release/atlas/${ATLAS_VERSION}/${TARBALL}
 ENV	MAVEN_OPTS	"-Xms2g -Xmx2g"
 
+RUN mkdir -p /tmp/atlas-src \
+    && mkdir -p /apache-atlas \
+    && mkdir -p /gremlin
 
-RUN git clone http://github.com/apache/atlas.git \
-	&& cd atlas \
-	&& mvn clean -DskipTests package -Pdist \
-	&& mv distro/target/apache-atlas-*-bin.tar.gz /apache-atlas.tar.gz \
-	&& mv distro/target/apache-atlas-*-kafka-hook.tar.gz /apache-atlas-kafka-hook.tar.gz \
-	&& mv distro/target/apache-atlas-*-hive-hook.tar.gz /apache-atlas-hive-hook.tar.gz \
-	&& mv distro/target/apache-atlas-*-sqoop-hook.tar.gz /apache-atlas-sqoop-hook.tar.gz
+COPY pom.xml.patch /tmp/atlas-src/
+
+RUN apt-get update \
+    && apt-get -y upgrade \
+    && apt-get -y install apt-utils \
+    && apt-get -y install \
+        maven \
+        wget \
+        python \
+        openjdk-8-jdk-headless \
+        patch \
+        unzip \
+    && cd /tmp \
+    && wget https://dlcdn.apache.org/atlas/${ATLAS_VERSION}/apache-atlas-${ATLAS_VERSION}-sources.tar.gz \
+    && tar --strip 1 -xzvf apache-atlas-${ATLAS_VERSION}-sources.tar.gz -C /tmp/atlas-src \
+    && rm apache-atlas-${ATLAS_VERSION}-sources.tar.gz \
+    && cd /tmp/atlas-src \
+    && sed -i 's/http:\/\/repo1.maven.org\/maven2/https:\/\/repo1.maven.org\/maven2/g' pom.xml \
+    && patch -b -f < pom.xml.patch \
+    && mvn clean \
+        -Dmaven.repo.local=/tmp/atlas-src/.mvn-repo \
+        -Dhttps.protocols=TLSv1.2 \
+        -DskipTests \
+        -Drat.skip=true \
+        package -Pdist
+
+RUN mv /tmp/atlas-src/target/apache-atlas-*-bin.tar.gz /apache-atlas.tar.gz \
+	&& mv /tmp/atlas-src/target/apache-atlas-*-kafka-hook.tar.gz /apache-atlas-kafka-hook.tar.gz \
+	&& mv /tmp/atlas-src/target/apache-atlas-*-hive-hook.tar.gz /apache-atlas-hive-hook.tar.gz \
+	&& mv /tmp/atlas-src/target/apache-atlas-*-sqoop-hook.tar.gz /apache-atlas-sqoop-hook.tar.gz
 
 FROM centos:7
 
@@ -23,7 +48,7 @@ COPY --from=stage-atlas /apache-atlas-sqoop-hook.tar.gz /apache-atlas-sqoop-hook
 
 # install which - GUS 10.5
 RUN yum update -y  \
-	&& yum install -y python python36 && yum install java-1.8.0-openjdk java-1.8.0-openjdk-devel python net-tools -y \
+	&& yum install -y python python37 && yum install java-1.8.0-openjdk java-1.8.0-openjdk-devel patch net-tools -y \
 	&& yum install which -y \
 	&& yum clean all
 RUN groupadd hadoop && \
