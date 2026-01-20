@@ -54,7 +54,6 @@ RUN yum update -y  \
 RUN groupadd hadoop && \
 	useradd -m -d /opt/atlas -g hadoop atlas
 
-RUN pip3 install amundsenatlastypes
 
 USER atlas
 
@@ -64,7 +63,6 @@ RUN cd /opt \
 COPY model /tmp/model
 COPY resources/atlas-setup.sh /tmp
 COPY resources/credentials /tmp
-COPY resources/init_amundsen.py /tmp
 
 COPY resources/atlas-application.properties /opt/atlas/conf/
 
