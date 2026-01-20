@@ -47,6 +47,32 @@ RUN groupadd atlas && \
     chown -R atlas:atlas /home/atlas
 
 
+ARG ATLAS_BUILD_JAVA_VERSION
+ARG TARGETARCH
+
+# Install necessary packages to build Atlas
+RUN apt-get update && apt-get -y install git maven unzip
+
+# Set environment variables
+ENV JAVA_HOME=/usr/lib/jvm/java-${ATLAS_BUILD_JAVA_VERSION}-openjdk-${TARGETARCH}
+ENV MAVEN_HOME=/usr/share/maven
+ENV PATH=/usr/java/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/apache-maven/bin
+
+RUN update-java-alternatives --set /usr/lib/jvm/java-1.${ATLAS_BUILD_JAVA_VERSION}.0-openjdk-${TARGETARCH}
+
+# setup atlas group, and users
+RUN mkdir -p /home/atlas/git && \
+    mkdir -p /home/atlas/.m2 && \
+    chown -R atlas:atlas /home/atlas
+
+COPY ./scripts/atlas-build.sh /home/atlas/scripts/
+
+VOLUME ["/home/atlas/.m2", "/home/atlas/scripts", "/home/atlas/patches", "/home/atlas/dist", "/home/atlas/src"]
+
+USER atlas
+
+RUN /home/atlas/scripts/atlas-build.sh
+
 ARG ATLAS_BACKEND=hbase
 ARG ATLAS_SERVER_JAVA_VERSION=8
 ARG ATLAS_VERSION=2.4.0
