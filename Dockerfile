@@ -1,6 +1,6 @@
 FROM ubuntu:20.04 AS stage-atlas
 
-ENV ATLAS_VERSION 2.3.0
+ENV ATLAS_VERSION 2.4.0
 ENV TARBALL apache-atlas-${ATLAS_VERSION}-sources.tar.gz
 ENV	MAVEN_OPTS	"-Xms2g -Xmx2g"
 
